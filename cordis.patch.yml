@@ -1,0 +1,7 @@
+# Inserted by the dsh-bigger-choice bundle. The plugin is purely client-side:
+# its Client module injects one stylesheet that enlarges the composer model
+# picker's popup. The Host half (index.js) has no services and no rows beyond
+# this one.
+- insert:
+    - id: dsh-bigger-choice
+      name: dsh-bigger-choice

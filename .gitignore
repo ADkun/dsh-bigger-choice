@@ -1,0 +1,16 @@
+# Dependencies and build output
+node_modules/
+dist/
+*.log
+*.tgz
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Local verification scratch (isolated DSH_HOME, probe profiles, screenshots)
+.verify/
+.probe-*
