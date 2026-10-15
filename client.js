@@ -307,8 +307,23 @@ window.__ModuleLoader__.load({
       name.includes('免费') === true ||
       price === 0
 
+    /** 写内联样式，只在值真的变了时写；返回是否真的改了。 */
     const setStyle = (el, prop, value) => {
-      if (el.style[prop] !== value) el.style[prop] = value
+      if (el.style[prop] === value) return false
+      el.style[prop] = value
+      return true
+    }
+
+    /**
+     * 通知宿主重新定位弹层：宿主的定位 effect 只依赖 open/pane/state/query，
+     * 我们改 DOM（筛行、换空态提示）不会触发它，弹层会停在旧位置甚至探出屏幕。
+     * 宿主把 place() 挂在 window 的捕获 scroll 上，直接派发一次 scroll 即可——
+     * place() 读的是活 DOM 的 offsetWidth/offsetHeight，我们的改动它看得见；
+     * 用户自己滚动菜单时走的也是这条路。
+     */
+    const requestReposition = () => {
+      if (typeof window === 'undefined') return
+      window.dispatchEvent(new Event('scroll'))
     }
 
     /** 行在模型面板里的稳定键：提供商名::模型显示名（title 属性即显示名）。 */
@@ -471,6 +486,7 @@ window.__ModuleLoader__.load({
       }
       const filtering = freeOnly === true || favOnly === true
       let anyVisible = false
+      let layoutChanged = false
       for (const section of viewport.querySelectorAll(':scope > [data-menu-group]')) {
         const heading = section.querySelector('[data-menu-group-heading]')?.textContent ?? ''
         const rows = [...section.querySelectorAll(':scope > button[role="menuitemradio"]')].map((el, order) => {
@@ -479,7 +495,7 @@ window.__ModuleLoader__.load({
           return { el, order, price, free: isFreeName(name, price), favKey: heading + '::' + name }
         })
         for (const row of rows) {
-          setStyle(row.el, 'display', passes(row) === true ? '' : 'none')
+          if (setStyle(row.el, 'display', passes(row) === true ? '' : 'none') === true) layoutChanged = true
           syncRow(row.el)
         }
         const visible = rows.filter((row) => passes(row) === true)
@@ -504,7 +520,7 @@ window.__ModuleLoader__.load({
         // 只在顺序真的变了才动 DOM：appendChild 移动已有节点不新增 mutation，
         // 观察器不会自我喂食；heading 与 start 哨兵是前两个子节点，不受影响。
         if (changed === true) for (const row of sorted) section.appendChild(row.el)
-        setStyle(section, 'display', filtering === true && visible.length === 0 ? 'none' : '')
+        if (setStyle(section, 'display', filtering === true && visible.length === 0 ? 'none' : '') === true) layoutChanged = true
       }
       let notice = menu.querySelector(':scope > .dsh-bigger-choice-free-empty')
       if (filtering === true && anyVisible === false) {
@@ -519,12 +535,16 @@ window.__ModuleLoader__.load({
             setFavOnly(menu, false)
           })
           menu.appendChild(notice)
+          layoutChanged = true
         } else if (notice.textContent !== noticeText()) {
           notice.textContent = noticeText()
         }
       } else if (notice !== null) {
         notice.remove()
+        layoutChanged = true
       }
+      // 可见行/空态真的变了：让宿主重算一次弹层位置，否则旧位置会探出屏幕。
+      if (layoutChanged === true) requestReposition()
     }
 
     /**
