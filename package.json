@@ -1,8 +1,8 @@
 {
   "name": "dsh-bigger-choice",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Enlarges the built-in composer model picker's popup (taller and wider) so one screen shows many more models. Client-only: it injects one stylesheet that overrides the host popup's box, which the host then measures and places as usual.",
+  "description": "Enlarges the built-in composer model picker's popup (taller and wider) so one screen shows many more models, adds a 免费 (free-only) toggle next to the search box, and sorts each provider's models cheapest-first. Client-only: it injects one stylesheet that overrides the host popup's box (which the host then measures and places as usual) plus a small DOM controller for the toggle, free filter and price sort.",
   "type": "module",
   "main": "./index.js",
   "exports": {
@@ -29,6 +29,6 @@
   "icon": "./icon.svg",
   "meta": {
     "title": "更大的模型选择框",
-    "description": "把输入框右下角模型选择器的下拉框放大：最高 78vh、最宽 620px，一屏能直接看到十几个模型，不用再滚很久。"
+    "description": "把输入框右下角模型选择器的下拉框放大：最高 78vh、最宽 720px，一屏能直接看到十几个模型；搜索框右侧多一枚「免费」开关，只看免费模型；每个提供商内部按价格从低到高排序，免费的最前、没标价格的垫底。"
   }
 }
